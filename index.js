@@ -16,6 +16,43 @@ console.log(uri);
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
   const bookingsCollection = client.db("paintingdb").collection("bookings");
+  const servicesCollection = client.db("paintingdb").collection("services");
+  const reviewsCollection = client.db("paintingdb").collection("reviews");
+
+  app.post('/addService', (req, res) => {
+    const serviceData = req.body;
+    servicesCollection.insertOne(serviceData)
+      .then(result => {
+        console.log(result);
+        res.send(result.insertedCount > 0)
+        
+      })
+  })
+
+  // read or retrieve data from database 
+  app.get('/services', (req, res) => {
+    servicesCollection.find({})
+      .toArray((error, documents) => {
+        res.send(documents);
+      })
+  })
+
+  app.post('/addReview', (req, res) => {
+    const reviews = req.body;
+    reviewsCollection.insertOne(reviews)
+      .then(result => {
+        console.log(result);
+        res.send(result.insertedCount > 0)
+        
+      })
+  })
+
+  app.get('/reviews', (req, res) => {
+    reviewsCollection.find({})
+      .toArray((error, documents) => {
+        res.send(documents);
+      })
+  })
 
   console.log('database connected successfully');
 });
