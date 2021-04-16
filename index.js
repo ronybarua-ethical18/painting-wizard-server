@@ -25,7 +25,7 @@ client.connect(err => {
       .then(result => {
         console.log(result);
         res.send(result.insertedCount > 0)
-        
+
       })
   })
 
@@ -43,7 +43,7 @@ client.connect(err => {
       .then(result => {
         console.log(result);
         res.send(result.insertedCount > 0)
-        
+
       })
   })
 
@@ -54,11 +54,29 @@ client.connect(err => {
       })
   })
 
+  app.post('/addBooking', (req, res) => {
+    const bookings = req.body;
+    bookingsCollection.insertOne(bookings)
+      .then(result => {
+        console.log(result);
+        res.send(result.insertedCount > 0)
+
+      })
+  })
+
+  //get a single item by id
+  app.get('/service/:id', (req, res) => {
+    servicesCollection.find({ _id: ObjectId(req.params.id) })
+      .toArray((error, documents) => {
+        res.send(documents[0]);
+      })
+  })
+
   console.log('database connected successfully');
 });
 
 app.get('/', (req, res) => {
-    res.send('Hello Painter!')
+  res.send('Hello Painter!')
 })
 
 app.listen(port)
