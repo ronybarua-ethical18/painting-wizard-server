@@ -18,7 +18,7 @@ client.connect(err => {
   const bookingsCollection = client.db("paintingdb").collection("bookings");
   const servicesCollection = client.db("paintingdb").collection("services");
   const reviewsCollection = client.db("paintingdb").collection("reviews");
-
+  const adminsCollection = client.db("paintingdb").collection("admins");
   app.post('/addService', (req, res) => {
     const serviceData = req.body;
     servicesCollection.insertOne(serviceData)
@@ -64,6 +64,24 @@ client.connect(err => {
       })
   })
 
+  app.get('/orders', (req, res) => {
+    bookingsCollection.find({})
+      .toArray((error, documents) => {
+        res.send(documents);
+      })
+  })
+
+  app.patch(`/updateBooking/:id`, (req, res) => {
+    bookingsCollection.updateOne({ _id: ObjectId(req.params.id) },
+      {
+        $set: { status: req.body.status }
+      })
+      .then(result => {
+        res.send(result.modifiedCount > 0);
+        console.log(result);
+      });
+  })
+
   //get a single item by id
   app.get('/service/:id', (req, res) => {
     servicesCollection.find({ _id: ObjectId(req.params.id) })
@@ -72,6 +90,44 @@ client.connect(err => {
       })
   })
 
+  //get item by email
+  app.get('/bookings', (req, res) => {
+    bookingsCollection.find({ email: req.query.email })
+      .toArray((error, documents) => {
+        res.status(200).send(documents);
+      })
+  })
+
+  // delete service from database 
+  app.delete('/deleteService/:id', (req, res) => {
+    console.log(req.params.id)
+    servicesCollection.deleteOne({ _id: ObjectId(req.params.id) })
+      .then(result => {
+        console.log(result)
+        res.send(result.deletedCount > 0);
+
+      })
+  })
+
+  // add admin to database
+  app.post('/addAdmin', (req, res) => {
+    const admin = req.body;
+    adminsCollection.insertOne(admin)
+      .then(result => {
+        console.log(result);
+        res.send(result.insertedCount > 0)
+
+      })
+  })
+
+  // is admin or normal user 
+  app.post('/isAdmin', (req, res) => {
+    const email = req.body.email;
+    adminsCollection.find({ email: email })
+      .toArray((err, doctors) => {
+        res.send(doctors.length > 0)
+      })
+  })
   console.log('database connected successfully');
 });
 
